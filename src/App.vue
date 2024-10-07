@@ -4,7 +4,7 @@ import HelloWorld from './components/HelloWorld.vue'
 </script>
 
 <template>
-  <header>
+  <header class="header">
   
 
     <div class="wrapper">
@@ -46,6 +46,10 @@ nav a {
 
 nav a:first-of-type {
   border: 0;
+}
+
+.header{
+  padding-bottom: 50px;
 }
 
 </style>
