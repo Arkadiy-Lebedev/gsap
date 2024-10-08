@@ -2,7 +2,7 @@
 import { gsap } from 'gsap'
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin'
 import { TextPlugin } from 'gsap/TextPlugin'
-import { onMounted, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 
 
 gsap.registerPlugin(MotionPathPlugin)
@@ -11,6 +11,11 @@ gsap.registerPlugin(TextPlugin)
 const title =ref<HTMLElement | null>(null)
 const containerSubTitle =ref<HTMLElement[] | null>(null)
 const me =ref<HTMLElement | null>(null)
+const circleRef =ref<HTMLElement | null>(null)
+
+
+const position = reactive({x:0,y:0})
+
 
 onMounted(() => {
   if (!title.value) {
@@ -29,12 +34,41 @@ gsap.from(me.value, {
   duration: 2.5, 
   text: ""});
 
+
+  gsap.from(circleRef.value,  
+  {  y: -20, scaleY: 0.2, duration: 0.3 }
+);
+
+const t1 = gsap.timeline({repeat: -1})
+        t1.to(circleRef.value, {
+            duration: 1,
+            top: 200,       
+            ease: "power1.out",            
+        })
+        t1.to(circleRef.value, {
+            top: function(index, target, targets) { 
+              console.log(target)
+        return 400},   
+
+        onComplete: ()=>{
+          circleRef.value.style.backgroundColor = 'green'
+        },      
+            duration: 1,
+            ease: "power1.in",    
+        }
+        )
+
+        t1.to(circleRef.value, {
+            top: 400, 
+            duration: 0.2,
+            onComplete: (target)=>{
+          circleRef.value.style.backgroundColor = 'red'
+        },  
+                  }
+        )
+
+
 })
-
-
-
-
-//now animate each character into place from 100px above, fading in:
 
 
 </script>
@@ -52,9 +86,40 @@ gsap.from(me.value, {
   <div class="section">
     <h1 ref="me" class="me">Немного обо мне:</h1>
   </div>
+
+  <div class="box">
+    <div class="most" ></div>
+<div class="circle" ref="circleRef"></div>
+  </div>
 </template>
 
 <style>
+
+.most{
+  position: absolute;
+    top: 300px;
+    left: 0px;
+    width: 100px;
+    height: 20px;
+    background: rgb(0, 7, 203);
+}
+
+.circle{
+    position: absolute;
+    top: 400px;
+    left: 10px;
+    width: 10px;
+    height: 30px;
+    background: red;
+}
+
+.box{
+  position: relative;
+  margin-top: 30px;
+  width: 600px;
+  height: 500px;
+  border: 1px solid black;
+}
 .section{
   margin-top: 50px;
 }
