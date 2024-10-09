@@ -12,9 +12,47 @@ const title =ref<HTMLElement | null>(null)
 const containerSubTitle =ref<HTMLElement[] | null>(null)
 const me =ref<HTMLElement | null>(null)
 const circleRef =ref<HTMLElement | null>(null)
-
+  let t1 
 
 const position = reactive({x:0,y:0})
+
+
+
+const jump = ()=>{
+  t1 = gsap.timeline({repeat: -1})
+  t1.to(circleRef.value, {
+            top: startJump.y, 
+            duration: 0.3,
+            onComplete: (target)=>{
+              if( circleRef.value){
+          circleRef.value.style.backgroundColor = 'red'
+          }
+
+        },  
+                  }
+        )
+        t1.to(circleRef.value, {
+            duration: 1,
+            top: startJump.y - 200,       
+            ease: "power1.out",            
+        })
+        t1.to(circleRef.value, {
+            top: startJump.y,   
+
+        onComplete: ()=>{
+          if( circleRef.value){
+              circleRef.value.style.backgroundColor = 'green'
+          }
+        
+        },      
+            duration: 1,
+            ease: "power1.in",    
+        }
+        )
+
+
+}
+
 
 
 onMounted(() => {
@@ -34,41 +72,119 @@ gsap.from(me.value, {
   duration: 2.5, 
   text: ""});
 
+//прыжки
+//   gsap.from(circleRef.value,  
+//   {  y: -20, scaleY: 0.2, duration: 0.3 }
+// );
 
-  gsap.from(circleRef.value,  
-  {  y: -20, scaleY: 0.2, duration: 0.3 }
-);
-
-const t1 = gsap.timeline({repeat: -1})
-        t1.to(circleRef.value, {
-            duration: 1,
-            top: 200,       
-            ease: "power1.out",            
-        })
-        t1.to(circleRef.value, {
-            top: function(index, target, targets) { 
-              console.log(target)
-        return 400},   
-
-        onComplete: ()=>{
-          circleRef.value.style.backgroundColor = 'green'
-        },      
-            duration: 1,
-            ease: "power1.in",    
-        }
-        )
-
-        t1.to(circleRef.value, {
-            top: 400, 
-            duration: 0.2,
-            onComplete: (target)=>{
-          circleRef.value.style.backgroundColor = 'red'
-        },  
-                  }
-        )
-
+jump()
 
 })
+
+
+const cssStyleForNumber = (str: string | undefined) => {
+  if(str){
+      return Number(str.split('px')[0])
+  } else {
+    return 0
+  }
+
+}
+
+
+// обработка логики прыжков
+interface IItem {
+  x: number,
+  y: number,
+  width: number,
+  heidth: number,
+}
+const arrayItems = ref<IItem[]>([{
+  y: 300,
+    x: 0,
+    width: 100,
+    heidth: 20
+},
+{
+  y: 180,
+    x: 5,
+    width: 100,
+    heidth: 20
+}
+,
+{
+  y: 50,
+    x: -86,
+    width: 100,
+    heidth: 20
+}
+])
+
+const stepArrayMost = ref<number>(0)
+
+interface IStartJump {
+  x: number,
+y:number
+}
+const startJump = reactive<IStartJump>({x:10,y:400})
+
+const nextMost = reactive<IItem>(
+  {x:0,
+  y:300,
+  width: 100,
+  heidth: 20
+}
+)
+  let trigger = false
+
+
+setInterval(()=>{
+  const human = circleRef.value
+  if(!human){
+    return
+  }
+
+  // const positionHumanY = Number(circleRef.value?.style.top.split('px')[0])
+  const positionHumanY = cssStyleForNumber(human?.style.top)
+  const positionHumanX = cssStyleForNumber(human?.style.left)
+
+if((positionHumanY + human.clientHeight) < nextMost.y){
+
+trigger = true
+}
+
+if((positionHumanY + human.clientHeight) > nextMost.y && trigger &&  (positionHumanX + human.clientWidth) > nextMost.x &&  (positionHumanX )< nextMost.x + nextMost.width){
+   console.log(arrayItems.value.length)
+   stepArrayMost.value++
+  trigger = false
+  startJump.y = nextMost.y - human.clientHeight
+
+  if(stepArrayMost.value < arrayItems.value.length){
+      nextMost.x= arrayItems.value[stepArrayMost.value].x
+  nextMost.y= arrayItems.value[stepArrayMost.value].y
+  nextMost.width= arrayItems.value[stepArrayMost.value].width
+  nextMost.heidth= arrayItems.value[stepArrayMost.value].heidth
+  }
+
+
+
+  // t1.pause()
+
+
+
+  t1.kill();
+  jump()
+}
+
+}, 30)
+
+
+
+
+
+
+
+//
 
 
 </script>
@@ -88,26 +204,20 @@ const t1 = gsap.timeline({repeat: -1})
   </div>
 
   <div class="box">
-    <div class="most" ></div>
-<div class="circle" ref="circleRef"></div>
+    <div class="most" v-for="item in arrayItems" :key="item.x" :style="{left: item.x + 'px', top: item.y + 'px', width: item.width + 'px', height: item.heidth + 'px'}"></div>
+<div class="circle" ref="circleRef" :style="{left: startJump.x + 'px', top: startJump.y + 'px'}"></div>
   </div>
 </template>
 
 <style>
 
 .most{
-  position: absolute;
-    top: 300px;
-    left: 0px;
-    width: 100px;
-    height: 20px;
+  position: absolute;   
     background: rgb(0, 7, 203);
 }
 
 .circle{
     position: absolute;
-    top: 400px;
-    left: 10px;
     width: 10px;
     height: 30px;
     background: red;
